@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-extension HasCancellables {
+public extension HasCancellables {
     /// convenience for making several bindings bound to object lifetime
     /// - Parameter b: collection of build blocks
     func bind(@BindingsBuilder _ bindings: () -> [Cancellable]) {
@@ -32,19 +32,19 @@ extension HasCancellables {
 
 infix operator ~>
 
-func ~><O: Publisher, B: Subject>(_ lhs: O, _ rhs: B) -> Cancellable where O.Output == B.Output, O.Failure == B.Failure {
+public func ~><O: Publisher, B: Subject>(_ lhs: O, _ rhs: B) -> Cancellable where O.Output == B.Output, O.Failure == B.Failure {
     lhs.receive(on: DispatchQueue.main)
         .subscribe(rhs)
 }
 
-func ~><T, O: Publisher>(_ lhs: O, _ rhs: @escaping (T) -> Void) -> Cancellable where O.Output == T, O.Failure == Never {
+public func ~><T, O: Publisher>(_ lhs: O, _ rhs: @escaping (T) -> Void) -> Cancellable where O.Output == T, O.Failure == Never {
     lhs.receive(on: DispatchQueue.main)
         .sink(receiveValue: rhs)
 }
 
 @resultBuilder
-struct BindingsBuilder {
-    static func buildBlock(_ components: Cancellable...) -> [Cancellable] {
+public struct BindingsBuilder {
+    public static func buildBlock(_ components: Cancellable...) -> [Cancellable] {
         components
     }
 }

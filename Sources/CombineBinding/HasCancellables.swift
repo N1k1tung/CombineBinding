@@ -8,6 +8,6 @@
 import Combine
 
 /// for objects with lifetime cancellables
-protocol HasCancellables: AnyObject {
+public protocol HasCancellables: AnyObject {
     var cancellables: Set<AnyCancellable> { get set }
 }
