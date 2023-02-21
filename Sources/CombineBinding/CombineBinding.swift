@@ -31,6 +31,7 @@ public extension HasCancellables {
     loginButton.tapped ~> vm.loginTapped
     emailButton.tapped ~> vm.emailTapped
     tableView.modelSelected ~> { [weak self] _ in self?.tableView.reloadData() }
+    textField.publisher(for: \.text) ~> (vm, \.text)
  }
  */
 
@@ -44,6 +45,11 @@ public func ~><O: Publisher, B: Subject>(_ lhs: O, _ rhs: B) -> Cancellable wher
 public func ~><T, O: Publisher>(_ lhs: O, _ rhs: @escaping (T) -> Void) -> Cancellable where O.Output == T, O.Failure == Never {
     lhs.receive(on: DispatchQueue.main)
         .sink(receiveValue: rhs)
+}
+
+public func ~><O: Publisher, Root>(_ lhs: O, _ rhs: (Root, ReferenceWritableKeyPath<Root, O.Output>)) -> Cancellable where O.Failure == Never {
+    lhs.receive(on: DispatchQueue.main)
+        .assign(to: rhs.1, on: rhs.0)
 }
 
 @resultBuilder
