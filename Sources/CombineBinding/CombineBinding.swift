@@ -14,7 +14,11 @@ public extension HasCancellables {
     func bind(@BindingsBuilder _ bindings: () -> [Cancellable]) {
         bindings().forEach { $0.store(in: &cancellables) }
     }
-
+    /// convenience for making several bindings bound to specified bag
+    /// - Parameter b: collection of build blocks
+    func bind(until bag: inout Set<AnyCancellable>, @BindingsBuilder _ bindings: () -> [Cancellable]) {
+        bindings().forEach { $0.store(in: &bag) }
+    }
 }
 
 /*
