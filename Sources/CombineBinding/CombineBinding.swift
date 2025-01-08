@@ -54,7 +54,16 @@ public func ~><O: Publisher, Root>(_ lhs: O, _ rhs: (Root, ReferenceWritableKeyP
 
 @resultBuilder
 public struct BindingsBuilder {
-    public static func buildBlock(_ components: Cancellable...) -> [Cancellable] {
-        components
+    public static func buildBlock(_ components: [Cancellable]...) -> [Cancellable] {
+        components.flatMap { $0 }
+    }
+    public static func buildExpression(_ expression: Cancellable) -> [Cancellable] {
+        [expression]
+    }
+    public static func buildExpression(_ expression: [Cancellable]) -> [Cancellable] {
+        expression
+    }
+    public static func buildArray(_ components: [[Cancellable]]) -> [Cancellable] {
+        components.flatMap { $0 }
     }
 }
