@@ -35,7 +35,8 @@ public extension HasCancellables {
  }
  */
 
-infix operator ~>
+infix operator ~> // intended for bindings inside view, values are received on main queue
+infix operator => // intended for bindings inside view model, or for fine grained control over dispatcher
 
 public func ~><O: Publisher, B: Subject>(_ lhs: O, _ rhs: B) -> Cancellable where O.Output == B.Output, O.Failure == B.Failure {
     lhs.receive(on: DispatchQueue.main)
@@ -56,6 +57,30 @@ public func ~><O: Publisher, Root>(_ lhs: O, _ rhs: (Root, ReferenceWritableKeyP
 @available(iOS 14.0, *)
 public func ~><O: Publisher, Output>(_ lhs: O, _ rhs: inout Published<Output>.Publisher) -> Cancellable where O.Failure == Never, O.Output == Output {
     lhs.receive(on: DispatchQueue.main)
+        .assign(to: &rhs)
+
+    return AnyCancellable {}
+}
+
+public func =><O: Publisher, B: Subject>(_ lhs: O, _ rhs: B) -> Cancellable where O.Output == B.Output, O.Failure == B.Failure {
+    lhs
+        .subscribe(rhs)
+}
+
+public func =><T, O: Publisher>(_ lhs: O, _ rhs: @escaping (T) -> Void) -> Cancellable where O.Output == T, O.Failure == Never {
+    lhs
+        .sink(receiveValue: rhs)
+}
+
+public func =><O: Publisher, Root>(_ lhs: O, _ rhs: (Root, ReferenceWritableKeyPath<Root, O.Output>)) -> Cancellable where O.Failure == Never {
+    lhs
+        .assign(to: rhs.1, on: rhs.0)
+}
+
+@available(macOS 11.0, *)
+@available(iOS 14.0, *)
+public func =><O: Publisher, Output>(_ lhs: O, _ rhs: inout Published<Output>.Publisher) -> Cancellable where O.Failure == Never, O.Output == Output {
+    lhs
         .assign(to: &rhs)
 
     return AnyCancellable {}
