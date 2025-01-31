@@ -52,6 +52,13 @@ public func ~><O: Publisher, Root>(_ lhs: O, _ rhs: (Root, ReferenceWritableKeyP
         .assign(to: rhs.1, on: rhs.0)
 }
 
+public func ~><O: Publisher, Output>(_ lhs: O, _ rhs: inout Published<Output>.Publisher) -> Cancellable where O.Failure == Never, O.Output == Output {
+    lhs.receive(on: DispatchQueue.main)
+        .assign(to: &rhs)
+
+    return AnyCancellable {}
+}
+
 @resultBuilder
 public struct BindingsBuilder {
     public static func buildBlock(_ components: [Cancellable]...) -> [Cancellable] {
